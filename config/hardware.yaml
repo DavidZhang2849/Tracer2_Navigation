@@ -1,0 +1,44 @@
+# Shared by every launch in this package. Distances: m; angles: rad.
+frames:
+  map: map
+  odom: odom
+  base: base_link
+  lidar: livox_frame
+  imu: livox_frame
+topics:
+  cloud: /livox/lidar
+  obstacle_cloud: /navigation/obstacle_cloud
+  imu: /livox/imu
+  odom: /odom
+  cmd_vel: /cmd_vel
+base:
+  port_name: can0
+  is_tracer_mini: false
+sensor_transform:
+  # Calibration supplied by the user, 2026-10-22: base_link -> livox_frame.
+  x: 0.252
+  y: 0.0
+  z: 0.236
+  roll: 0.0
+  pitch: 0.0
+  yaw: 0.0
+robot:
+  # User dimensions: length along X = 610 mm, width along Y = 702 mm.
+  # base_link is assumed at the chassis rectangle centre in XY.
+  length: 0.610
+  width: 0.702
+  radius: 0.4651
+  footprint: [[0.305, 0.351], [0.305, -0.351], [-0.305, -0.351], [-0.305, 0.351]]
+  dimensions_calibrated: true
+obstacle_filter:
+  # Height in frames.base (base_link), not in the LiDAR, map or odom frame.
+  # User confirmed floor Z = 0 and robot top Z = +1.50 m, 2026-11-11.
+  min_height: 0.08
+  max_height: 1.50
+  transform_timeout: 0.1
+maps:
+  pcd: /home/steno/maps/map_corridor.pcd
+  yaml: /home/steno/maps/nav2/map_corridor.yaml
+localization:
+  # Global-search sensor height above floor; adjust if base_link is above floor.
+  global_sensor_height_m: 0.396

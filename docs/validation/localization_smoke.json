@@ -1,0 +1,29 @@
+{
+  "test": "PCD-derived synthetic scans, no physical accuracy claim",
+  "accepted_matches": 16,
+  "sensor_translation": [
+    0.252,
+    0.0,
+    0.236
+  ],
+  "map_odom_xy": [
+    0.5515431917991881,
+    0.5750250206189569
+  ],
+  "expected_xy": [
+    0.5587613630174897,
+    0.5728592151605854
+  ],
+  "map_odom_yaw": 0.3004196260959969,
+  "expected_yaw": 0.30000000000000004,
+  "active_nav2_servers": [
+    "behavior_server",
+    "bt_navigator",
+    "controller_server",
+    "map_server",
+    "planner_server",
+    "smoother_server",
+    "velocity_smoother",
+    "waypoint_follower"
+  ]
+}

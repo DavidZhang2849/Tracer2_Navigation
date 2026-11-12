@@ -1,0 +1,19 @@
+{
+  "test": "synthetic navigation, no CAN hardware",
+  "active_servers": [
+    "behavior_server",
+    "bt_navigator",
+    "controller_server",
+    "map_server",
+    "planner_server",
+    "smoother_server",
+    "velocity_smoother",
+    "waypoint_follower"
+  ],
+  "path_poses": 58,
+  "nonzero_commands": 111,
+  "final_position": [
+    1.261187454801326,
+    0.017084822533257316
+  ]
+}
