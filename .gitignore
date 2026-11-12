@@ -1,8 +1,16 @@
+# Python caches and package metadata
 __pycache__/
 *.pyc
 .pytest_cache/
 *.egg-info/
+
+# Build and ROS 2 workspace outputs
 build/
 dist/
+install/
+log/
 
+# Editor settings and generated C/C++ index databases
 .vscode/
+*.vc.db*
+*.VC.db*
