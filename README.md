@@ -92,9 +92,10 @@ ROS 2 Humble 的硬件适配集中在本包。依赖原始 `tracer_base`、
 | `config/localization.yaml` | 三维地图 NDT 参数；轮式 TF 预测 |
 | `config/nav2_humble.yaml` | Humble 插件、规划控制、PointCloud2 障碍物层 |
 | `config/cyclonedds.xml` | 多进程发现容量，避免 Humble Cyclone DDS participant 索引耗尽 |
-| `rviz/navigation.rviz` | 三维地图、点云、Nav2 地图、路径和 Goal 工具 |
+| `rviz/navigation.rviz` | 机器人模型、三维地图、点云、Nav2 路径和 Goal 工具 |
 | `launch/mid360.launch.py` | 雷达驱动，默认 PointCloud2；`xfer_format:=1` 为 CustomMsg |
 | `launch/base.launch.py` | CAN 底盘、真实 `/odom`、`odom -> base_link` |
+| `launch/robot_model.launch.py` | 单独启动本机 URDF 和 RViz 模型预览 |
 | `launch/mapping.launch.py` | MID360 CustomMsg + FAST-LIO 建图 |
 | `launch/localization.launch.py` | Nav2 TF 模式定位、自动初始化、安装 TF、RViz |
 | `launch/nav2.launch.py` | 仅导航；复用已经启动的底盘、雷达和本包定位 |
@@ -107,7 +108,7 @@ ROS 2 Humble 的硬件适配集中在本包。依赖原始 `tracer_base`、
 ```bash
 source ~/agilex_tracer_ros2_ws/src/tracer_navigation/scripts/setup.bash
 cd ~/agilex_tracer_ros2_ws
-colcon build --symlink-install --packages-select tracer_navigation
+colcon build --symlink-install --packages-select tuplateurdf tcurdf tracer_navigation
 ```
 
 之后在每个终端中统一加载：
@@ -152,6 +153,29 @@ ros2 launch tracer_navigation navigation.launch.py \
 自动初始化可设 `auto_initialize:=false`，改用手动初始位姿。
 仅做启动配置检查可设 `autostart:=false`；查看全部入口参数可加 `--show-args`。
 
+## 在 RViz 中显示机器人模型
+
+构建后，`navigation.launch.py` 默认随定位启动模型发布器。
+`localization.launch.py` 分步启动时也会发布 `/robot_description`。
+导航 RViz 默认启用 **RobotModel**，通过 `map → odom → base_link` 将模型显示在地图上。
+如果已经启动了模型发布器，可给定位或组合入口传入 `publish_robot_model:=false`。
+
+只预览模型时，在已加载环境的终端运行：
+
+```bash
+ros2 launch tracer_navigation robot_model.launch.py
+```
+
+此入口以 `base_link` 为 RViz 固定坐标系，可脱离地图和底盘单独运行。
+已有 RViz 时，加 `rviz:=false` 并添加 **RobotModel**，将 **Description Topic**
+设为 `/robot_description`，**Durability Policy** 设为 **Transient Local**。
+
+模型使用 `src/urdf` 的底盘、双层支架和 MID360 CAD 网格，以及本机 Humble 的
+UR3 和 D455 描述包。AG-95 夹爪的描述包需另行准备，默认模型省略该夹爪。
+模型默认用预设关节姿态显示 UR3。已有 UR3 驱动时，可传入
+`model_joint_states:=/joint_states`，话题中的关节名需与模型的 `ur_arm_` 前缀一致。
+点云继续使用 `hardware.yaml` 标定的 `livox_frame`，CAD 雷达外观沿用模型安装位置。
+
 ## 导航障碍物高度过滤
 
 已确认地面在 `base_link` 中的 Z 为 0，机器人顶部为 Z=1.50 m。
@@ -171,7 +195,7 @@ Nav2 YAML 中的宽高度范围是 map/odom 坐标下的二次保护，实际物
 
 ```bash
 cd ~/agilex_tracer_ros2_ws
-colcon build --symlink-install --packages-select tracer_navigation
+colcon build --symlink-install --packages-select tuplateurdf tcurdf tracer_navigation
 source src/tracer_navigation/scripts/setup.bash
 ros2 launch tracer_navigation navigation.launch.py
 ```

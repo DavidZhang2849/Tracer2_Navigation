@@ -52,6 +52,37 @@ def sensor_tf(hardware):
                  name='tracer_lidar_tf', arguments=arguments, output='screen')]
 
 
+def robot_model_actions(root, base_frame, use_sim_time, joint_states_topic, rviz):
+    import xacro
+
+    model = Path(get_package_share_directory('tcurdf')) / 'urdf' / 'tcurdf.urdf'
+    robot_description = xacro.process_file(str(model), mappings={'base_frame': base_frame})
+    joint_state_remap = [('joint_states', joint_states_topic or '/tracer/model_joint_states')]
+    result = [Node(
+        package='robot_state_publisher', executable='robot_state_publisher',
+        name='tracer_robot_state_publisher', output='screen',
+        parameters=[{'robot_description': robot_description.toxml(),
+                     'use_sim_time': use_sim_time}],
+        remappings=joint_state_remap,
+    )]
+    if not joint_states_topic:
+        result.append(Node(
+            package='joint_state_publisher', executable='joint_state_publisher',
+            name='tracer_model_joint_state_publisher', output='screen',
+            parameters=[{'use_sim_time': use_sim_time,
+                         'zeros.ur_arm_shoulder_lift_joint': -1.57,
+                         'zeros.ur_arm_wrist_1_joint': -1.57}],
+            remappings=joint_state_remap,
+        ))
+    if rviz:
+        config = read_yaml(root / 'rviz' / 'robot_model.rviz')
+        config['Visualization Manager']['Global Options']['Fixed Frame'] = base_frame
+        result.append(Node(package='rviz2', executable='rviz2', output='screen',
+                           arguments=['-d', temporary_yaml(config, 'tracer_model_rviz_')],
+                           parameters=[{'use_sim_time': use_sim_time}]))
+    return result
+
+
 def description(component):
     root = share()
     arguments = {
@@ -62,12 +93,14 @@ def description(component):
         'mid360': {'livox_config': str(root / 'config' / 'livox_mid360.json'),
                    'xfer_format': '0'},
         'base': {'port_name': ''},
+        'robot_model': {'rviz': 'true', 'model_joint_states': ''},
         'mapping': {'start_base': 'false', 'start_lidar': 'true', 'rviz': 'true',
                     'fastlio_config': str(root / 'config' / 'fastlio_mid360.yaml'),
                     'map_output': str(Path.home() / 'maps' / 'fastlio_mapping.pcd')},
         'localization': {'map': '', 'map_yaml': '', 'rviz': 'true',
                          'localization_config': str(root / 'config' / 'localization.yaml'),
                          'auto_initialize': 'true', 'publish_sensor_tf': 'true',
+                         'publish_robot_model': 'true', 'model_joint_states': '',
                          'state_file': ''},
         'nav2': {'map_yaml': '', 'autostart': 'true',
                  'nav2_config': str(root / 'config' / 'nav2_humble.yaml')},
@@ -75,6 +108,7 @@ def description(component):
                        'start_lidar': 'true', 'start_localization': 'true',
                        'rviz': 'true', 'autostart': 'true',
                        'auto_initialize': 'true', 'publish_sensor_tf': 'true',
+                       'publish_robot_model': 'true', 'model_joint_states': '',
                        'localization_config': str(root / 'config' / 'localization.yaml'),
                        'nav2_config': str(root / 'config' / 'nav2_humble.yaml'),
                        'state_file': ''},
@@ -93,6 +127,9 @@ def actions(context, component):
     use_sim_time = boolean(context, 'use_sim_time')
     common = {'hardware_config': hardware_path, 'use_sim_time': use_sim_time}
     root = share()
+    if component == 'robot_model':
+        return robot_model_actions(root, frames['base'], use_sim_time,
+                                   value(context, 'model_joint_states'), boolean(context, 'rviz'))
     if component == 'base':
         base = hardware['base']
         return [Node(package='tracer_base', executable='tracer_base_node', name='tracer',
@@ -181,6 +218,9 @@ def actions(context, component):
         ])]
         if boolean(context, 'publish_sensor_tf'):
             result += sensor_tf(hardware)
+        if boolean(context, 'publish_robot_model'):
+            result.append(include('robot_model', **common, rviz=False,
+                                  model_joint_states=value(context, 'model_joint_states')))
         if boolean(context, 'rviz'):
             rviz = read_yaml(root / 'rviz' / 'navigation.rviz')
             manager = rviz['Visualization Manager']
@@ -258,6 +298,8 @@ def actions(context, component):
                 localization_config=value(context, 'localization_config'),
                 auto_initialize=boolean(context, 'auto_initialize'),
                 publish_sensor_tf=boolean(context, 'publish_sensor_tf'),
+                publish_robot_model=boolean(context, 'publish_robot_model'),
+                model_joint_states=value(context, 'model_joint_states'),
                 state_file=value(context, 'state_file'),
             ))
         result.append(include('nav2', **common, map_yaml=map_yaml,
