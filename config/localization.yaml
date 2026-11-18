@@ -33,7 +33,7 @@
     local_map_radius: 150.0
     local_map_update_distance: 10.0
     localizability_min_xy_eigen_ratio: 0.05
-    map_path: /home/steno/maps/map_corridor.pcd
+    map_path: /home/steno/maps/home.pcd
     max_twist_prediction_dt: 0.5
     ndt_max_iterations: 35
     ndt_num_threads: 4

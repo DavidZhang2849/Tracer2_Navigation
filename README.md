@@ -143,8 +143,8 @@ ros2 launch tracer_navigation navigation.launch.py start_base:=false start_lidar
 
 ```bash
 ros2 launch tracer_navigation navigation.launch.py \
-  map:=/home/steno/maps/map_corridor.pcd \
-  map_yaml:=/home/steno/maps/nav2/map_corridor.yaml \
+  map:=/home/steno/maps/home.pcd \
+  map_yaml:=/home/steno/maps/nav2/home.yaml \
   hardware_config:=/home/steno/agilex_tracer_ros2_ws/src/tracer_navigation/config/hardware.yaml \
   rviz:=true
 ```
@@ -224,7 +224,7 @@ ros2 launch tracer_navigation mapping.launch.py
 `start_lidar:=false`。`map_output` 默认 `~/maps/fastlio_mapping.pcd`，可覆盖。
 
 ```bash
-ros2 service call /map_save std_srvs/srv/Trigger '{}'
+`ros2 service call /map_save std_srvs/srv/Trigger '{}'`
 ```
 
 `/map_save` 使用指定的 `map_output`。FAST-LIO 退出时的扫描缓存保存仍由其原始

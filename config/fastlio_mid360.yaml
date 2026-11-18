@@ -8,7 +8,7 @@
     filter_size_map: 0.5
     cube_side_length: 1000.0
     runtime_pos_log_enable: false
-    map_file_path: /home/steno/maps/fastlio_mapping.pcd
+    map_file_path: /home/steno/maps/home.pcd
     common:
       lid_topic: /livox/lidar
       imu_topic: /livox/imu

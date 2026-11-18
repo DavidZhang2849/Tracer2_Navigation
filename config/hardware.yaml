@@ -37,8 +37,8 @@ obstacle_filter:
   max_height: 1.50
   transform_timeout: 0.1
 maps:
-  pcd: /home/steno/maps/map_corridor.pcd
-  yaml: /home/steno/maps/nav2/map_corridor.yaml
+  pcd: /home/steno/maps/home.pcd
+  yaml: /home/steno/maps/nav2/home.yaml
 localization:
   # Global-search sensor height above floor; adjust if base_link is above floor.
   global_sensor_height_m: 0.396
